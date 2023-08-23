@@ -2,6 +2,28 @@
 
 This repository provides a Docker Compose configuration for setting up a comprehensive media server environment using Docker containers. The configuration includes various media management tools such as Plex, Sonarr, Radarr, NZBGet, Bazarr, Flaresolverr, and more.
 
+## Table of Contents
+
+- [Media Server Docker Compose Setup](#media-server-docker-compose-setup)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Getting Started](#getting-started)
+  - [Services Included](#services-included)
+  - [Customization](#customization)
+  - [Configuring Services](#configuring-services)
+    - [Bazarr](#bazarr)
+    - [Flaresolverr](#flaresolverr)
+    - [Deluge](#deluge)
+    - [NZBGet](#nzbget)
+    - [Overseerr](#overseerr)
+    - [Plex](#plex)
+    - [Prowlarr](#prowlarr)
+    - [Radarr](#radarr)
+    - [Sonarr](#sonarr)
+    - [Tautulli](#tautulli)
+  - [Notes](#notes)
+  - [License](#license)
+
 ## Prerequisites
 
 - [Docker](https://www.docker.com/)
@@ -12,8 +34,8 @@ This repository provides a Docker Compose configuration for setting up a compreh
 1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/izm20/docker-media-server.git
-   cd docker-media-server
+   git clone https://github.com/your-username/your-media-server.git
+   cd your-media-server
    ```
 
 2. Customize the `.env` file with your configuration:
@@ -30,6 +52,7 @@ This repository provides a Docker Compose configuration for setting up a compreh
 4. Start the Containers:
 
    ```bash
+   docker network create media
    docker-compose -p "media" up -d
    ```
 
@@ -51,10 +74,59 @@ This repository provides a Docker Compose configuration for setting up a compreh
 - Each service's configuration can be modified in the `docker-compose.yml` file.
 - Adjust environment variables, volumes, ports, etc., to meet your requirements.
 
-## Usage
+## Configuring Services
 
-- Access services via their respective ports (e.g., Plex at <http://localhost:32400>).
-- Follow service documentation to configure and manage your media library.
+### Bazarr
+
+- Access Bazarr web UI at http://localhost:6767.
+- Configure your preferred subtitle download providers.
+- Set up movie and TV show libraries to automatically fetch subtitles.
+
+### Flaresolverr
+
+- Access Flaresolverr configuration via http://localhost:8191.
+- Configure CAPTCHA solving options for various services.
+
+### Deluge
+
+- Access Deluge web UI at http://localhost:8112.
+- Set up your download directories and preferences.
+
+### NZBGet
+
+- Access NZBGet web UI at http://localhost:6789.
+- Configure your Usenet servers and download preferences.
+
+### Overseerr
+
+- Access Overseerr web UI at http://localhost:5055.
+- Set up your media requests and integration with other services.
+
+### Plex
+
+- Access Plex web UI at http://localhost:32400/web.
+- Sign in or create a Plex account.
+- Add libraries for your media content.
+
+### Prowlarr
+
+- Access Prowlarr web UI at http://localhost:9696.
+- Configure indexers for Sonarr and Radarr.
+
+### Radarr
+
+- Access Radarr web UI at http://localhost:7878.
+- Add movies to your library and configure your download client.
+
+### Sonarr
+
+- Access Sonarr web UI at http://localhost:8989.
+- Add TV shows to your library and configure your download client.
+
+### Tautulli
+
+- Access Tautulli web UI at http://localhost:8181.
+- Configure Plex monitoring and notifications.
 
 ## Notes
 
@@ -64,3 +136,5 @@ This repository provides a Docker Compose configuration for setting up a compreh
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+This updated README includes detailed instructions on how to configure each tool within the Docker Compose setup. Make sure to customize the configuration for each tool according to your needs.

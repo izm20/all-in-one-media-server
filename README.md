@@ -133,6 +133,10 @@ This repository provides a Docker Compose configuration for setting up a compreh
 - Keep sensitive information (e.g., tokens, passwords) secure in the `.env` file.
 - This setup is extensible and can be further customized to fit your needs.
 
+## Tutorial Reference
+
+This repository was inspired by the tutorial: [All-In-One Media Server with Docker](https://academy.pointtosource.com/containers/all-in-one-media-server-docker/). In this tutorial, you can find detailed instructions on how to configure each tool.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

@@ -106,8 +106,6 @@ services:
       - $PLEXMEDIA:/data/media:rw
       - /tmp:/transcode:rw
     network_mode: host
-    ports:
-      - 32400:32400
 
   prowlarr: #indexer manager for Sonarr & Radarr
     image: ghcr.io/linuxserver/prowlarr:develop

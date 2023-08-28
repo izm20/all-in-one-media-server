@@ -46,7 +46,7 @@ This repository provides a Docker Compose configuration for setting up a compreh
 
    - Set `PUID` and `PGID` to your user and group IDs (to match permissions).
    - Set `TZ` to your desired timezone.
-   - Define `MEDIADIR` and `PLEXMEDIA` paths for your media and Plex libraries.
+   - Define `MEDIADIR`, `PLEXMEDIA` and `CONFIGDIR` paths for your media, Plex libraries and docker apps config.
    - Set `PLEX_CLAIM`, `PLEX_PASS`, and `PLEX_ADVERTISE_IP` for Plex configuration.
 
 3. Configure Services:

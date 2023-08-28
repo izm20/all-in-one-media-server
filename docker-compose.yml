@@ -18,7 +18,7 @@ services:
       - PGID=$PGID
       - TZ=$TZ
     volumes:
-      - ./bazarr:/config
+      - $CONFIGDIR/bazarr:/config
       - $MEDIADIR/libraries/movies:/movies #optional
       - $MEDIADIR/libraries/tv:/tv #optional
       - $MEDIADIR/libraries/anime:/anime #optional
@@ -49,7 +49,7 @@ services:
 
   deluge:
     container_name: deluge
-    image: linuxserver/deluge:latest
+    image: ghcr.io/linuxserver/deluge:latest
     restart: always
     environment:
       - PUID=$PUID # default user id, defined in .env
@@ -57,7 +57,7 @@ services:
       - TZ=$TZ # timezone, defined in .env
     volumes:
       - $MEDIADIR/downloads:/downloads # downloads folder
-      - ./deluge:/config # config files
+      - $CONFIGDIR/deluge:/config # config files
     ports:
       - 8112:8112
 
@@ -69,7 +69,7 @@ services:
       - PGID=$PGID
       - TZ=$TZ
     volumes:
-      - ./nzbget:/config
+      - $CONFIGDIR/nzbget:/config
       - $MEDIADIR/usenet:/media/usenet
     ports:
       - 6789:6789
@@ -83,7 +83,7 @@ services:
       - PGID=$PGID
       - TZ=$TZ
     volumes:
-      - ./overseerr:/app/config
+      - $CONFIGDIR/overseerr:/app/config
     ports:
       - 5055:5055
     restart: unless-stopped
@@ -104,7 +104,7 @@ services:
       - PLEX_PASS=$PLEX_PASS
       - ADVERTISE_IP=$PLEX_ADVERTISE_IP
     volumes:
-      - ./plex:/config:rw
+      - $CONFIGDIR/plex:/config:rw
       - $PLEXMEDIA:/data/media:rw
       - /tmp:/transcode:rw
     network_mode: host
@@ -119,7 +119,7 @@ services:
       - PGID=$PGID
       - TZ=$TZ
     volumes:
-      - ./prowlarr:/config
+      - $CONFIGDIR/prowlarr:/config
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -133,7 +133,7 @@ services:
       - TZ=$TZ
       - UMASK=022
     volumes:
-      - ./radarr:/config
+      - $CONFIGDIR/radarr:/config
       - $MEDIADIR:/media
     ports:
       - 7878:7878
@@ -148,7 +148,7 @@ services:
       - TZ=$TZ
       - UMASK=022
     volumes:
-      - ./sonarrV3:/config
+      - $CONFIGDIR/sonarrV3:/config
       - $MEDIADIR:/media
     ports:
       - 8989:8989
@@ -164,7 +164,7 @@ services:
       - UMASK=002
       - DEBUG=no
     volumes:
-      - ./tautulli:/config
+      - $CONFIGDIR/tautulli:/config
     ports:
       - 8181:8181
     restart: unless-stopped
@@ -173,7 +173,7 @@ services:
   #   image: portainer/portainer-ce
   #   container_name: portainer
   #   volumes:
-  #     - ./portainer:/data
+  #     - $CONFIGDIR/portainer:/data
   #     - /var/run/docker.sock:/var/run/docker.sock
   #   environment:
   #     - TZ=$TZ
@@ -185,7 +185,7 @@ services:
 
   # jackett:
   #   container_name: jackett
-  #   image: linuxserver/jackett:latest
+  #   image: ghcr.io/linuxserver/jackett:latest
   #   restart: unless-stopped
   #   environment:
   #     - PUID=$PUID # default user id, defined in .env
@@ -193,14 +193,14 @@ services:
   #     - TZ=$TZ # timezone, defined in .env
   #   volumes:
   #     - /etc/localtime:/etc/localtime:ro
-  #     - ./jackett/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
-  #     - ./jackett:/config # config files
+  #     - $CONFIGDIR/jackett/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
+  #     - $CONFIGDIR/jackett:/config # config files
   #   ports:
   #     - 9117:9117
 
   # ombi: #media requesting tool
   #   container_name: ombi
-  #   image: lscr.io/linuxserver/ombi:latest
+  #   image: ghcr.io/linuxserver/ombi:latest
   #   ports:
   #     - 3579:3579
   #   environment:
@@ -211,4 +211,4 @@ services:
   #     - ARGS
   #     - DEBUG=no
   #   volumes:
-  #     - ./ombi:/config
+  #     - $CONFIGDIR/ombi:/config

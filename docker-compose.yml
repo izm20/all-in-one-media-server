@@ -93,8 +93,8 @@ services:
     logging:
       driver: json-file
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
+      - PUID=$PLEX_PUID
+      - PGID=$PLEX_PGID
       - TZ=$TZ
       - UMASK=002
       - DEBUG=no

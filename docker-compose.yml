@@ -4,8 +4,6 @@ networks:
   default:
     name: media
     external: false
-  media:
-    external: false
   # portainer: # enable if using portainer
   #   external: false
 

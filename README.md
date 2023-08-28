@@ -44,7 +44,8 @@ This repository provides a Docker Compose configuration for setting up a compreh
 
 2. Customize the `.env` file with your configuration:
 
-   - Set `PUID` and `PGID` to your user and group IDs (to match permissions).
+   - Only change `PUID` and `PGID` to your user and group IDs if is neccessary.
+   - Set `PLEX_PUID` and `PLEX_PGID` to your user and group IDs.
    - Set `TZ` to your desired timezone.
    - Define `MEDIADIR`, `PLEXMEDIA` and `CONFIGDIR` paths for your media, Plex libraries and docker apps config.
    - Set `PLEX_CLAIM`, `PLEX_PASS`, and `PLEX_ADVERTISE_IP` for Plex configuration.

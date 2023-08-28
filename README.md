@@ -38,8 +38,8 @@ This repository provides a Docker Compose configuration for setting up a compreh
 1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/izm20/docker-media-server.git
-   cd docker-media-server
+   git clone https://github.com/izm20/all-in-one-media-server.git
+   cd all-in-one-media-server
    ```
 
 2. Customize the `.env` file with your configuration:

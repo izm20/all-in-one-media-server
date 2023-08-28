@@ -1,10 +1,10 @@
-# Media Server Docker Compose Setup
+# All-In-One Media Server with Docker
 
 This repository provides a Docker Compose configuration for setting up a comprehensive media server environment using Docker containers. The configuration includes various media management tools such as Plex, Sonarr, Radarr, NZBGet, Bazarr, Flaresolverr, and more.
 
 ## Table of Contents
 
-- [Media Server Docker Compose Setup](#media-server-docker-compose-setup)
+- [All-In-One Media Server with Docker](#all-in-one-media-server-with-docker)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
   - [Getting Started](#getting-started)
@@ -21,7 +21,11 @@ This repository provides a Docker Compose configuration for setting up a compreh
     - [Radarr](#radarr)
     - [Sonarr](#sonarr)
     - [Tautulli](#tautulli)
+    - [Portainer (Optional)](#portainer-optional)
+    - [Jackett (Optional)](#jackett-optional)
+    - [Ombi (Optional)](#ombi-optional)
   - [Notes](#notes)
+  - [Tutorial Reference](#tutorial-reference)
   - [License](#license)
 
 ## Prerequisites
@@ -47,13 +51,12 @@ This repository provides a Docker Compose configuration for setting up a compreh
 
 3. Configure Services:
 
-   - Open `docker-compose.yml` and adjust the environment variables, volumes, and ports for each service as needed.
+   - Open `docker-compose.yml` and adjust the environment variables, volumes, ports, etc., for each service as needed.
 
 4. Start the Containers:
 
    ```bash
-   docker network create media
-   docker-compose -p "media" up -d
+   docker-compose up -d
    ```
 
 ## Services Included
@@ -125,8 +128,23 @@ This repository provides a Docker Compose configuration for setting up a compreh
 
 ### Tautulli
 
-- Access Tautulli web UI at http://localhost:8181.
+-
+
+ Access Tautulli web UI at http://localhost:8181.
 - Configure Plex monitoring and notifications.
+
+### Portainer (Optional)
+
+- Access Portainer web UI at http://localhost:9000.
+- Manage and monitor your Docker containers with ease.
+
+### Jackett (Optional)
+
+- Configure Jackett indexers for enhanced content searching.
+
+### Ombi (Optional)
+
+- Set up Ombi to allow users to request media content.
 
 ## Notes
 
@@ -140,5 +158,3 @@ This repository was inspired by the tutorial: [All-In-One Media Server with Dock
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-This updated README includes detailed instructions on how to configure each tool within the Docker Compose setup. Make sure to customize the configuration for each tool according to your needs.

@@ -1,6 +1,6 @@
 # All-In-One Media Server with Docker
 
-This repository provides a Docker Compose configuration for setting up a comprehensive media server environment using Docker containers. The configuration includes various media management tools such as Plex, Sonarr, Radarr, NZBGet, Bazarr, Flaresolverr, and more.
+This repository provides a Docker Compose configuration for setting up a comprehensive media server environment using Docker containers. The configuration includes various media management tools such as Plex, Sonarr, Radarr, Bazarr, Overseerr, Tautulli, Flaresolverr, and VPN for secure network connectivity.
 
 ## Table of Contents
 
@@ -12,8 +12,6 @@ This repository provides a Docker Compose configuration for setting up a compreh
   - [Customization](#customization)
   - [Configuring Services](#configuring-services)
     - [Bazarr](#bazarr)
-    - [Flaresolverr](#flaresolverr)
-    - [Deluge](#deluge)
     - [NZBGet](#nzbget)
     - [Overseerr](#overseerr)
     - [Plex](#plex)
@@ -21,15 +19,17 @@ This repository provides a Docker Compose configuration for setting up a compreh
     - [Radarr](#radarr)
     - [Sonarr](#sonarr)
     - [Tautulli](#tautulli)
-    - [Portainer (Optional)](#portainer-optional)
-    - [Jackett (Optional)](#jackett-optional)
-    - [Ombi (Optional)](#ombi-optional)
+    - [Portainer](#portainer)
+    - [VPN](#vpn)
+    - [Flaresolverr](#flaresolverr)
+    - [Deluge](#deluge)
   - [Notes](#notes)
   - [Tutorial Reference](#tutorial-reference)
   - [License](#license)
 
 ## Prerequisites
 
+- A VPN services (I use [NordVPN](https://nordvpn.com/))
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
 
@@ -43,17 +43,49 @@ This repository provides a Docker Compose configuration for setting up a compreh
    ```
 
 2. Customize the `.env` file with your configuration:
+   
+   Before you start using the Docker Compose setup, make sure to configure the `.env` file to match your environment and preferences. Here's a breakdown of the variables you can set in the `.env` file:
 
-   - Only change `PUID` and `PGID` to your user and group IDs if is neccessary.
-   - Set `PLEX_PUID` and `PLEX_PGID` to your user and group IDs.
-   - Set `TZ` to your desired timezone.
-   - Define `MEDIADIR`, `PLEXMEDIA` and `CONFIGDIR` paths for your media, Plex libraries and docker apps config.
-   - Set `PLEX_CLAIM`, `PLEX_PASS`, and `PLEX_ADVERTISE_IP` for Plex configuration.
+    #### General Configuration
+
+    - `PUID`: 0
+    - `PGID`: 0
+    - `TZ`: Your desired timezone (e.g., `"America/New_York"`).
+
+    #### Media and Configuration Directories
+
+    - `MEDIADIR`: Path to your media directory where your media files are located.
+    - `CONFIGDIR`: Path to your configuration directory where your tool configurations will be stored.
+
+    #### Plex Configuration
+
+    - `PLEX_PUID`: UID of the user for Plex.
+    - `PLEX_PGID`: GID of the group for Plex.
+    - `PLEXMEDIA`: Path to your Plex libraries.
+    - `PLEX_ADVERTISE_IP`: URL for Plex server access.
+
+    #### Flaresolverr Configuration
+
+    - `CAPTCHA_SOLVER`: Type of CAPTCHA solver to use (e.g., `"hcaptcha-solver"`).
+
+    #### VPN Configuration
+
+    - `VPN_SERVICE_PROVIDER`: Your VPN provider's name.
+    - `OPENVPN_USER`: Encrypted username for VPN.
+    - `OPENVPN_PASSWORD`: Encrypted password for VPN.
+    - `SERVER_REGIONS`: Desired server regions for VPN.
+    - `VPN_TYPE`: Type of VPN service to use (e.g., `"wireguard"`, `"openvpn"`).
+
+    Refer to the [gluetun GitHub repository](https://github.com/qdm12/gluetun) for more information on configuring the VPN service.
+
+    Make sure to replace the placeholders (`<...>`) with your actual values.
+
+    **Note**: Be cautious with sensitive information like passwords and encrypted credentials in the `.env` file. Keep it secure and never share it publicly.
 
 3. Configure Services:
 
-   - Open `docker-compose.yml` and adjust the environment variables, volumes, ports, etc., for each service as needed.
-
+   - Open `docker-compose.yml` and adjust the environment variables, volumes, ports, etc., for each service as needed.  
+  
 4. Start the Containers:
 
    ```bash
@@ -62,16 +94,17 @@ This repository provides a Docker Compose configuration for setting up a compreh
 
 ## Services Included
 
-- **Bazarr**: Subtitle grabber.
-- **Flaresolverr**: DNS resolver for CAPTCHA bypass.
-- **Deluge**: Torrent downloader.
-- **NZBGet**: Usenet download agent.
-- **Overseerr**: Media requesting tool.
 - **Plex**: Media server.
 - **Prowlarr**: Indexer manager for Sonarr & Radarr.
 - **Radarr**: Movie search agent.
 - **Sonarr**: TV show search agent.
+- **Bazarr**: Subtitle grabber.
+- **Overseerr**: Media requesting tool.
 - **Tautulli**: Plex monitoring.
+- **VPN**: Secure network connectivity.
+- **Deluge**: Torrent downloader.
+- **Flaresolverr**: DNS resolver for CAPTCHA bypass.
+- **Portainer**: Container management.
 
 ## Customization
 
@@ -85,16 +118,6 @@ This repository provides a Docker Compose configuration for setting up a compreh
 - Access Bazarr web UI at http://localhost:6767.
 - Configure your preferred subtitle download providers.
 - Set up movie and TV show libraries to automatically fetch subtitles.
-
-### Flaresolverr
-
-- Access Flaresolverr configuration via http://localhost:8191.
-- Configure CAPTCHA solving options for various services.
-
-### Deluge
-
-- Access Deluge web UI at http://localhost:8112.
-- Set up your download directories and preferences.
 
 ### NZBGet
 
@@ -129,23 +152,30 @@ This repository provides a Docker Compose configuration for setting up a compreh
 
 ### Tautulli
 
--
-
- Access Tautulli web UI at http://localhost:8181.
+- Access Tautulli web UI at http://localhost:8181.
 - Configure Plex monitoring and notifications.
 
-### Portainer (Optional)
+### Portainer
 
 - Access Portainer web UI at http://localhost:9000.
 - Manage and monitor your Docker containers with ease.
 
-### Jackett (Optional)
+### VPN
 
-- Configure Jackett indexers for enhanced content searching.
+- Connects your services securely to the VPN network.
 
-### Ombi (Optional)
 
-- Set up Ombi to allow users to request media content.
+### Flaresolverr
+
+- Access Flaresolverr configuration via http://localhost:8191.
+- Configure CAPTCHA solving options for various services.
+- Now this service is under the vpn network.
+
+### Deluge
+
+- Access Deluge web UI at http://localhost:8112.
+- Set up your download directories and preferences.
+- Now this service is under the vpn network.
 
 ## Notes
 

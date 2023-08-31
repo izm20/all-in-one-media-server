@@ -1,114 +1,26 @@
-version: '3.8'
-
 networks:
   default:
     name: media
     external: false
-  # portainer: # enable if using portainer
-  #   external: false
 
 services:
-  bazarr: #subtitle grabber
-    image: ghcr.io/linuxserver/bazarr
-    container_name: bazarr
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-    volumes:
-      - $CONFIGDIR/bazarr:/config
-      - $MEDIADIR/libraries/movies:/movies #optional
-      - $MEDIADIR/libraries/tv:/tv #optional
-      - $MEDIADIR/libraries/anime:/anime #optional
-    ports:
-      - 6767:6767
-    restart: unless-stopped
-
-  flaresolverr:
-    # DockerHub mirror flaresolverr/flaresolverr:latest
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    environment:
-      - TZ=$TZ
-      - LOG_HTML=${LOG_HTML:-false}
-      - HOST=${HOST:-0.0.0.0}
-      # Used to change the verbosity of the logging
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
-      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-None}
-      #- CAPTCHA_SOLVER=hcaptcha-solver
-      # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
-      #- CAPTCHA_SOLVER=harvester
-      #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
-      - HEADLESS=${HEADLESS:-true}
-    ports:
-      - 8191:8191
-    restart: unless-stopped
-
-  deluge:
-    container_name: deluge
-    image: ghcr.io/linuxserver/deluge:latest
-    restart: always
-    environment:
-      - PUID=$PUID # default user id, defined in .env
-      - PGID=$PGID # default group id, defined in .env
-      - TZ=$TZ # timezone, defined in .env
-    volumes:
-      - $MEDIADIR/downloads:/downloads # downloads folder
-      - $CONFIGDIR/deluge:/config # config files
-    ports:
-      - 8112:8112
-
-  nzbget: #usenet download agent
-    image: ghcr.io/linuxserver/nzbget
-    container_name: nzbget
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-    volumes:
-      - $CONFIGDIR/nzbget:/config
-      - $MEDIADIR/usenet:/media/usenet
-    ports:
-      - 6789:6789
-    restart: unless-stopped
-
-  overseerr: #media requesting tool
-    image: sctx/overseerr:latest
-    container_name: overseerr
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-    volumes:
-      - $CONFIGDIR/overseerr:/app/config
-    ports:
-      - 5055:5055
-    restart: unless-stopped
-
   plex: # Media Server
     container_name: plex
-    image: cr.hotio.dev/hotio/plex
+    image: ghcr.io/linuxserver/plex
     restart: unless-stopped
-    logging:
-      driver: json-file
     environment:
       - PUID=$PLEX_PUID
       - PGID=$PLEX_PGID
       - TZ=$TZ
-      - UMASK=002
-      - DEBUG=no
+      - VERSION=docker
       - PLEX_CLAIM=$PLEX_CLAIM
-      - PLEX_PASS=$PLEX_PASS
-      - ADVERTISE_IP=$PLEX_ADVERTISE_IP
     volumes:
       - $CONFIGDIR/plex:/config:rw
       - $PLEXMEDIA:/data/media:rw
-      - /tmp:/transcode:rw
-    network_mode: host
-
+    ports:
+      - 32400:32400
   prowlarr: #indexer manager for Sonarr & Radarr
-    image: ghcr.io/linuxserver/prowlarr:develop
+    image: ghcr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
       - PUID=$PUID
@@ -121,7 +33,7 @@ services:
     restart: unless-stopped
 
   radarr: #movie search agent
-    image: ghcr.io/linuxserver/radarr
+    image: ghcr.io/linuxserver/radarr:latest
     container_name: radarr
     environment:
       - PUID=$PUID
@@ -150,6 +62,35 @@ services:
       - 8989:8989
     restart: unless-stopped
 
+  bazarr: #subtitle grabber
+    image: ghcr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $CONFIGDIR/bazarr:/config
+      - $MEDIADIR/libraries/movies:/movies #optional
+      - $MEDIADIR/libraries/tv:/tv #optional
+      - $MEDIADIR/libraries/anime:/anime #optional
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+
+  overseerr: #media requesting tool
+    image: ghcr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $CONFIGDIR/overseerr:/app/config
+    ports:
+      - 5055:5055
+    restart: unless-stopped
+
   tautulli: #plex monitoring
     image: ghcr.io/linuxserver/tautulli:latest
     container_name: tautulli
@@ -165,46 +106,68 @@ services:
       - 8181:8181
     restart: unless-stopped
 
-  # portainer: #container management
-  #   image: portainer/portainer-ce
-  #   container_name: portainer
-  #   volumes:
-  #     - $CONFIGDIR/portainer:/data
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   environment:
-  #     - TZ=$TZ
-  #   ports:
-  #     - 9000:9000 #change before the ':' if necessary to avoid port conflicts
-  #   networks: #delete as necessary
-  #      - portainer
-  #   restart: unless-stopped
+  nordvpn:
+    container_name: GlueTun-Nord
+    image: qmcgaw/gluetun:latest
+    cap_add:
+      - NET_ADMIN
+    ports:
+        - 8191:8191
+        - 8112:8112
+        - 6881:6881
+        - 6881:6881/udp
+    environment:
+      - VPN_SERVICE_PROVIDER=$VPN_SERVICE_PROVIDER
+      - OPENVPN_USER=$OPENVPN_USER
+      - OPENVPN_PASSWORD=$OPENVPN_PASSWORD
+      - SERVER_REGIONS=$SERVER_REGIONS
+      - COUNTRY=$SERVER_REGIONS
+      - VPN_TYPE=$VPN_TYPE
+      - TZ=$TZ
+    restart: unless-stopped
 
-  # jackett:
-  #   container_name: jackett
-  #   image: ghcr.io/linuxserver/jackett:latest
-  #   restart: unless-stopped
-  #   environment:
-  #     - PUID=$PUID # default user id, defined in .env
-  #     - PGID=$PGID # default group id, defined in .env
-  #     - TZ=$TZ # timezone, defined in .env
-  #   volumes:
-  #     - /etc/localtime:/etc/localtime:ro
-  #     - $CONFIGDIR/jackett/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
-  #     - $CONFIGDIR/jackett:/config # config files
-  #   ports:
-  #     - 9117:9117
+  deluge:
+    container_name: deluge
+    image: ghcr.io/linuxserver/deluge:latest
+    network_mode: "service:nordvpn"
+    restart: always
+    environment:
+      - WEBUI_PORT=8112
+      - PUID=$PUID # default user id, defined in .env
+      - PGID=$PGID # default group id, defined in .env
+      - TZ=$TZ # timezone, defined in .env
+    volumes:
+      - $MEDIADIR/downloads:/downloads # downloads folder
+      - $CONFIGDIR/deluge:/config # config files
 
-  # ombi: #media requesting tool
-  #   container_name: ombi
-  #   image: ghcr.io/linuxserver/ombi:latest
-  #   ports:
-  #     - 3579:3579
-  #   environment:
-  #     - PUID=$PUID
-  #     - PGID=$PGID
-  #     - TZ=$TZ
-  #     - UMASK=002
-  #     - ARGS
-  #     - DEBUG=no
-  #   volumes:
-  #     - $CONFIGDIR/ombi:/config
+  flaresolverr:
+    # DockerHub mirror flaresolverr/flaresolverr:latest
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: "service:nordvpn"
+    environment:
+      - TZ=$TZ
+      - LOG_HTML=${LOG_HTML:-false}
+      - HOST=${HOST:-0.0.0.0}
+      # Used to change the verbosity of the logging
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-None}
+      #- CAPTCHA_SOLVER=hcaptcha-solver
+      # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
+      #- CAPTCHA_SOLVER=harvester
+      #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
+      - HEADLESS=${HEADLESS:-true}
+    restart: unless-stopped
+
+  portainer: #container management
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    volumes:
+      - $CONFIGDIR/portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=$TZ
+    ports:
+      - 9000:9000 #change before the ':' if necessary to avoid port conflicts
+    restart: unless-stopped

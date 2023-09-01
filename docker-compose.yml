@@ -11,7 +11,7 @@ services:
     volumes:
       - $CONFIGDIR/plex:/config:rw
       - $PLEXMEDIA:/data/media:rw
-      - $CONFIGDIR/plex/tmp:/transcode:rw    
+      - $CONFIGDIR/plex/tmp:/transcode:rw
 
   prowlarr: #indexer manager for Sonarr & Radarr
     image: ghcr.io/linuxserver/prowlarr:latest
@@ -119,10 +119,10 @@ services:
     cap_add:
       - NET_ADMIN
     ports:
-        - 8191:8191
-        - 8112:8112
-        - 6881:6881
-        - 6881:6881/udp
+      - 8191:8191
+      - 8112:8112
+      - 6881:6881
+      - 6881:6881/udp
     environment:
       - VPN_SERVICE_PROVIDER=$VPN_SERVICE_PROVIDER
       - OPENVPN_USER=$OPENVPN_USER
@@ -195,6 +195,7 @@ services:
       - 19999:19999
 
   watchtower:
+    container_name: watchtower
     image: containrrr/watchtower:latest
     network_mode: host
     volumes:

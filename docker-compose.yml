@@ -50,7 +50,7 @@ services:
       - TZ=$TZ
       - UMASK=022
     volumes:
-      - $CONFIGDIR/sonarrV3:/config
+      - $CONFIGDIR/sonarr:/config
       - $MEDIADIR:/media
     ports:
       - 8989:8989
@@ -80,7 +80,7 @@ services:
       - PGID=$PGID
       - TZ=$TZ
     volumes:
-      - $CONFIGDIR/overseerr:/app/config
+      - $CONFIGDIR/overseerr:/config
     ports:
       - 5055:5055
     restart: unless-stopped

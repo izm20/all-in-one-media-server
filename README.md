@@ -25,7 +25,6 @@ This repository provides a Docker Compose configuration for setting up a compreh
     - [Netdata](#netdata)
     - [Watchtower](#watchtower)
   - [Notes](#notes)
-  - [Tutorial Reference](#tutorial-reference)
   - [License](#license)
 
 ## Prerequisites
@@ -64,7 +63,7 @@ This repository provides a Docker Compose configuration for setting up a compreh
    - `PLEX_PGID`: GID of the group for Plex.
    - `PLEXMEDIA`: Path to your Plex libraries.
    - `PLEX_ADVERTISE_IP`: URL for Plex server access.
-  
+
   #### Plex Configuration
 
    - `ORGANIZR_PUID`: UID of the user for Organizr.

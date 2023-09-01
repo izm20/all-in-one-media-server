@@ -1,24 +1,18 @@
-networks:
-  default:
-    name: media
-    external: false
-
 services:
   plex: # Media Server
     container_name: plex
-    image: ghcr.io/linuxserver/plex
+    image: ghcr.io/linuxserver/plex:latest
     restart: unless-stopped
+    network_mode: host
     environment:
       - PUID=$PLEX_PUID
       - PGID=$PLEX_PGID
       - TZ=$TZ
-      - VERSION=docker
-      - PLEX_CLAIM=$PLEX_CLAIM
     volumes:
       - $CONFIGDIR/plex:/config:rw
       - $PLEXMEDIA:/data/media:rw
-    ports:
-      - 32400:32400
+      - $CONFIGDIR/plex/tmp:/transcode:rw    
+
   prowlarr: #indexer manager for Sonarr & Radarr
     image: ghcr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -106,6 +100,19 @@ services:
       - 8181:8181
     restart: unless-stopped
 
+  organizr:
+    image: organizr/organizr:latest
+    container_name: organizr
+    environment:
+      - PUID=$ORGANIZR_PUID
+      - PGID=$ORGANIZR_PGID
+      - TZ=$TZ
+    volumes:
+      - $CONFIGDIR/organizr:/config
+    ports:
+      - 80:80
+    restart: unless-stopped
+
   vpn:
     container_name: GlueTun-Nord
     image: qmcgaw/gluetun:latest
@@ -141,7 +148,6 @@ services:
       - $CONFIGDIR/deluge:/config # config files
 
   flaresolverr:
-    # DockerHub mirror flaresolverr/flaresolverr:latest
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
     network_mode: "service:vpn"
@@ -149,20 +155,15 @@ services:
       - TZ=$TZ
       - LOG_HTML=${LOG_HTML:-false}
       - HOST=${HOST:-0.0.0.0}
-      # Used to change the verbosity of the logging
       - LOG_LEVEL=${LOG_LEVEL:-info}
-      # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-None}
-      #- CAPTCHA_SOLVER=hcaptcha-solver
-      # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
-      #- CAPTCHA_SOLVER=harvester
-      #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
       - HEADLESS=${HEADLESS:-true}
     restart: unless-stopped
 
   portainer: #container management
     image: portainer/portainer-ce:latest
     container_name: portainer
+    network_mode: host
     volumes:
       - $CONFIGDIR/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
@@ -171,3 +172,36 @@ services:
     ports:
       - 9000:9000 #change before the ':' if necessary to avoid port conflicts
     restart: unless-stopped
+
+  netdata:
+    image: netdata/netdata:latest
+    container_name: netdata
+    network_mode: host
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - $CONFIGDIR/netdata/netdataconfig:/etc/netdata
+      - $CONFIGDIR/netdata/netdatalib:/var/lib/netdata
+      - $CONFIGDIR/netdata/netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 19999:19999
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_SCHEDULE=0 0 4 * * 0
+      - WATCHTOWER_CLEANUP=true
+      - TZ=$TZ

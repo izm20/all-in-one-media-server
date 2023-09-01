@@ -1,6 +1,6 @@
 # All-In-One Media Server with Docker
 
-This repository provides a Docker Compose configuration for setting up a comprehensive media server environment using Docker containers. The configuration includes various media management tools such as Plex, Sonarr, Radarr, Bazarr, Overseerr, Tautulli, Flaresolverr, and VPN for secure network connectivity.
+This repository provides a Docker Compose configuration for setting up a comprehensive media server environment using Docker containers. The configuration includes various media management tools such as Plex, Sonarr, Radarr, Bazarr, Overseerr, Tautulli, Flaresolverr, VPN for secure network connectivity, Netdata for system monitoring, and Watchtower for automatic container updates.
 
 ## Table of Contents
 
@@ -12,7 +12,6 @@ This repository provides a Docker Compose configuration for setting up a compreh
   - [Customization](#customization)
   - [Configuring Services](#configuring-services)
     - [Bazarr](#bazarr)
-    - [NZBGet](#nzbget)
     - [Overseerr](#overseerr)
     - [Plex](#plex)
     - [Prowlarr](#prowlarr)
@@ -23,13 +22,15 @@ This repository provides a Docker Compose configuration for setting up a compreh
     - [VPN](#vpn)
     - [Flaresolverr](#flaresolverr)
     - [Deluge](#deluge)
+    - [Netdata](#netdata)
+    - [Watchtower](#watchtower)
   - [Notes](#notes)
   - [Tutorial Reference](#tutorial-reference)
   - [License](#license)
 
 ## Prerequisites
 
-- A VPN services (I use [NordVPN](https://nordvpn.com/))
+- A VPN service (I use [NordVPN](https://nordvpn.com/))
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
 
@@ -43,49 +44,54 @@ This repository provides a Docker Compose configuration for setting up a compreh
    ```
 
 2. Customize the `.env` file with your configuration:
-   
+
    Before you start using the Docker Compose setup, make sure to configure the `.env` file to match your environment and preferences. Here's a breakdown of the variables you can set in the `.env` file:
 
-    #### General Configuration
+   #### General Configuration
 
-    - `PUID`: 0
-    - `PGID`: 0
-    - `TZ`: Your desired timezone (e.g., `"America/New_York"`).
+   - `PUID`: 0
+   - `PGID`: 0
+   - `TZ`: Your desired timezone (e.g., `"America/New_York"`).
 
-    #### Media and Configuration Directories
+   #### Media and Configuration Directories
 
-    - `MEDIADIR`: Path to your media directory where your media files are located.
-    - `CONFIGDIR`: Path to your configuration directory where your tool configurations will be stored.
+   - `MEDIADIR`: Path to your media directory where your media files are located.
+   - `CONFIGDIR`: Path to your configuration directory where your tool configurations will be stored.
 
-    #### Plex Configuration
+   #### Plex Configuration
 
-    - `PLEX_PUID`: UID of the user for Plex.
-    - `PLEX_PGID`: GID of the group for Plex.
-    - `PLEXMEDIA`: Path to your Plex libraries.
-    - `PLEX_ADVERTISE_IP`: URL for Plex server access.
+   - `PLEX_PUID`: UID of the user for Plex.
+   - `PLEX_PGID`: GID of the group for Plex.
+   - `PLEXMEDIA`: Path to your Plex libraries.
+   - `PLEX_ADVERTISE_IP`: URL for Plex server access.
+  
+  #### Plex Configuration
 
-    #### Flaresolverr Configuration
+   - `ORGANIZR_PUID`: UID of the user for Organizr.
+   - `ORGANIZR_PGID`: GID of the group for Organizr.
 
-    - `CAPTCHA_SOLVER`: Type of CAPTCHA solver to use (e.g., `"hcaptcha-solver"`).
+   #### Flaresolverr Configuration
 
-    #### VPN Configuration
+   - `CAPTCHA_SOLVER`: Type of CAPTCHA solver to use (e.g., `"hcaptcha-solver"`).
 
-    - `VPN_SERVICE_PROVIDER`: Your VPN provider's name.
-    - `OPENVPN_USER`: Encrypted username for VPN.
-    - `OPENVPN_PASSWORD`: Encrypted password for VPN.
-    - `SERVER_REGIONS`: Desired server regions for VPN.
-    - `VPN_TYPE`: Type of VPN service to use (e.g., `"wireguard"`, `"openvpn"`).
+   #### VPN Configuration
 
-    Refer to the [gluetun GitHub repository](https://github.com/qdm12/gluetun) for more information on configuring the VPN service.
+   - `VPN_SERVICE_PROVIDER`: Your VPN provider's name.
+   - `OPENVPN_USER`: Encrypted username for VPN.
+   - `OPENVPN_PASSWORD`: Encrypted password for VPN.
+   - `SERVER_REGIONS`: Desired server regions for VPN.
+   - `VPN_TYPE`: Type of VPN service to use (e.g., `"wireguard"`, `"openvpn"`).
 
-    Make sure to replace the placeholders (`<...>`) with your actual values.
+   Refer to the [gluetun GitHub repository](https://github.com/qdm12/gluetun) for more information on configuring the VPN service.
 
-    **Note**: Be cautious with sensitive information like passwords and encrypted credentials in the `.env` file. Keep it secure and never share it publicly.
+   Make sure to replace the placeholders (`<...>`) with your actual values.
+
+   **Note**: Be cautious with sensitive information like passwords and encrypted credentials in the `.env` file. Keep it secure and never share it publicly.
 
 3. Configure Services:
 
-   - Open `docker-compose.yml` and adjust the environment variables, volumes, ports, etc., for each service as needed.  
-  
+   - Open `docker-compose.yml` and adjust the environment variables, volumes, ports, etc., for each service as needed.
+
 4. Start the Containers:
 
    ```bash
@@ -105,6 +111,9 @@ This repository provides a Docker Compose configuration for setting up a compreh
 - **Deluge**: Torrent downloader.
 - **Flaresolverr**: DNS resolver for CAPTCHA bypass.
 - **Portainer**: Container management.
+- **Netdata**: System monitoring.
+- **Watchtower**: Automatic container updates.
+- **Organizr**: A customized homepage for your services.
 
 ## Customization
 
@@ -118,11 +127,6 @@ This repository provides a Docker Compose configuration for setting up a compreh
 - Access Bazarr web UI at http://localhost:6767.
 - Configure your preferred subtitle download providers.
 - Set up movie and TV show libraries to automatically fetch subtitles.
-
-### NZBGet
-
-- Access NZBGet web UI at http://localhost:6789.
-- Configure your Usenet servers and download preferences.
 
 ### Overseerr
 
@@ -164,27 +168,38 @@ This repository provides a Docker Compose configuration for setting up a compreh
 
 - Connects your services securely to the VPN network.
 
-
 ### Flaresolverr
 
 - Access Flaresolverr configuration via http://localhost:8191.
 - Configure CAPTCHA solving options for various services.
-- Now this service is under the vpn network.
+- Now this service is under the VPN network.
 
 ### Deluge
 
 - Access Deluge web UI at http://localhost:8112.
 - Set up your download directories and preferences.
-- Now this service is under the vpn network.
+- Now this service is under the VPN network.
+
+### Organizr
+
+- Access Organizr web UI at http://localhost:9983.
+- Configure Organizr to access and manage all your media server tools in one place.
+
+### Netdata
+
+- Access Netdata web UI at http://localhost:19999.
+- Monitor system performance and resource usage in real-time.
+
+### Watchtower
+
+- Watchtower is responsible for automatic container updates.
+- Configuration options for Watchtower can be found in the `docker-compose.yml` file under the `watchtower` service.
+- By default, Watchtower is scheduled to check for updates every Sunday at 4:00 AM (00:00:00 UTC on Sundays). You can adjust the schedule as needed.
 
 ## Notes
 
 - Keep sensitive information (e.g., tokens, passwords) secure in the `.env` file.
 - This setup is extensible and can be further customized to fit your needs.
-
-## Tutorial Reference
-
-This repository was inspired by the tutorial: [All-In-One Media Server with Docker](https://academy.pointtosource.com/containers/all-in-one-media-server-docker/). In this tutorial, you can find detailed instructions on how to configure each tool.
 
 ## License
 

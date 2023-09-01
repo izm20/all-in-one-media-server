@@ -1,21 +1,24 @@
+version: "3.8"
+
 services:
-  plex: # Media Server
+  plex:
     container_name: plex
     image: ghcr.io/linuxserver/plex:latest
     restart: unless-stopped
-    network_mode: host
     environment:
       - PUID=$PLEX_PUID
       - PGID=$PLEX_PGID
       - TZ=$TZ
+    network_mode: host
     volumes:
       - $CONFIGDIR/plex:/config:rw
       - $PLEXMEDIA:/data/media:rw
       - $CONFIGDIR/plex/tmp:/transcode:rw
 
-  prowlarr: #indexer manager for Sonarr & Radarr
-    image: ghcr.io/linuxserver/prowlarr:latest
+  prowlarr:
     container_name: prowlarr
+    image: ghcr.io/linuxserver/prowlarr:latest
+    restart: unless-stopped
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -23,12 +26,12 @@ services:
     volumes:
       - $CONFIGDIR/prowlarr:/config
     ports:
-      - 9696:9696
-    restart: unless-stopped
+      - "9696:9696"
 
-  radarr: #movie search agent
-    image: ghcr.io/linuxserver/radarr:latest
+  radarr:
     container_name: radarr
+    image: ghcr.io/linuxserver/radarr:latest
+    restart: unless-stopped
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -38,12 +41,12 @@ services:
       - $CONFIGDIR/radarr:/config
       - $MEDIADIR:/media
     ports:
-      - 7878:7878
-    restart: unless-stopped
+      - "7878:7878"
 
-  sonarr: #TV show search agent
-    image: ghcr.io/linuxserver/sonarr:latest
+  sonarr:
     container_name: sonarr
+    image: ghcr.io/linuxserver/sonarr:latest
+    restart: unless-stopped
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -53,28 +56,28 @@ services:
       - $CONFIGDIR/sonarr:/config
       - $MEDIADIR:/media
     ports:
-      - 8989:8989
-    restart: unless-stopped
+      - "8989:8989"
 
-  bazarr: #subtitle grabber
-    image: ghcr.io/linuxserver/bazarr:latest
+  bazarr:
     container_name: bazarr
+    image: ghcr.io/linuxserver/bazarr:latest
+    restart: unless-stopped
     environment:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/bazarr:/config
-      - $MEDIADIR/libraries/movies:/movies #optional
-      - $MEDIADIR/libraries/tv:/tv #optional
-      - $MEDIADIR/libraries/anime:/anime #optional
+      - $MEDIADIR/libraries/movies:/movies
+      - $MEDIADIR/libraries/tv:/tv
+      - $MEDIADIR/libraries/anime:/anime
     ports:
-      - 6767:6767
-    restart: unless-stopped
+      - "6767:6767"
 
-  overseerr: #media requesting tool
-    image: ghcr.io/linuxserver/overseerr:latest
+  overseerr:
     container_name: overseerr
+    image: ghcr.io/linuxserver/overseerr:latest
+    restart: unless-stopped
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -82,12 +85,12 @@ services:
     volumes:
       - $CONFIGDIR/overseerr:/config
     ports:
-      - 5055:5055
-    restart: unless-stopped
+      - "5055:5055"
 
-  tautulli: #plex monitoring
-    image: ghcr.io/linuxserver/tautulli:latest
+  tautulli:
     container_name: tautulli
+    image: ghcr.io/linuxserver/tautulli:latest
+    restart: unless-stopped
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -97,12 +100,12 @@ services:
     volumes:
       - $CONFIGDIR/tautulli:/config
     ports:
-      - 8181:8181
-    restart: unless-stopped
+      - "8181:8181"
 
   organizr:
-    image: organizr/organizr:latest
     container_name: organizr
+    image: organizr/organizr:latest
+    restart: unless-stopped
     environment:
       - PUID=$ORGANIZR_PUID
       - PGID=$ORGANIZR_PGID
@@ -110,19 +113,19 @@ services:
     volumes:
       - $CONFIGDIR/organizr:/config
     ports:
-      - 9983:80
-    restart: unless-stopped
+      - "9983:80"
 
   vpn:
     container_name: GlueTun-Nord
     image: qmcgaw/gluetun:latest
+    restart: unless-stopped
     cap_add:
       - NET_ADMIN
     ports:
-      - 8191:8191
-      - 8112:8112
-      - 6881:6881
-      - 6881:6881/udp
+      - "8191:8191"
+      - "8112:8112"
+      - "6881:6881"
+      - "6881:6881/udp"
     environment:
       - VPN_SERVICE_PROVIDER=$VPN_SERVICE_PROVIDER
       - OPENVPN_USER=$OPENVPN_USER
@@ -131,25 +134,25 @@ services:
       - COUNTRY=$SERVER_REGIONS
       - VPN_TYPE=$VPN_TYPE
       - TZ=$TZ
-    restart: unless-stopped
 
   deluge:
     container_name: deluge
     image: ghcr.io/linuxserver/deluge:latest
+    restart: unless-stopped
     network_mode: "service:vpn"
-    restart: always
     environment:
       - WEBUI_PORT=8112
-      - PUID=$PUID # default user id, defined in .env
-      - PGID=$PGID # default group id, defined in .env
-      - TZ=$TZ # timezone, defined in .env
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
     volumes:
-      - $MEDIADIR/downloads:/downloads # downloads folder
-      - $CONFIGDIR/deluge:/config # config files
+      - $MEDIADIR/downloads:/downloads
+      - $CONFIGDIR/deluge:/config
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    restart: unless-stopped
     network_mode: "service:vpn"
     environment:
       - TZ=$TZ
@@ -158,23 +161,22 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-None}
       - HEADLESS=${HEADLESS:-true}
-    restart: unless-stopped
 
-  portainer: #container management
-    image: portainer/portainer-ce:latest
+  portainer:
     container_name: portainer
+    image: portainer/portainer-ce:latest
+    restart: unless-stopped
     volumes:
       - $CONFIGDIR/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=$TZ
     ports:
-      - 9000:9000 #change before the ':' if necessary to avoid port conflicts
-    restart: unless-stopped
+      - "9000:9000"
 
   netdata:
-    image: netdata/netdata:latest
     container_name: netdata
+    image: netdata/netdata:latest
     restart: unless-stopped
     cap_add:
       - SYS_PTRACE
@@ -192,11 +194,12 @@ services:
       - /etc/os-release:/host/etc/os-release:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - 19999:19999
+      - "19999:19999"
 
   watchtower:
     container_name: watchtower
     image: containrrr/watchtower:latest
+    restart: unless-stopped
     network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

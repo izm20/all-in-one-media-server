@@ -110,7 +110,7 @@ services:
     volumes:
       - $CONFIGDIR/organizr:/config
     ports:
-      - 80:80
+      - 9983:80
     restart: unless-stopped
 
   vpn:
@@ -163,7 +163,6 @@ services:
   portainer: #container management
     image: portainer/portainer-ce:latest
     container_name: portainer
-    network_mode: host
     volumes:
       - $CONFIGDIR/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
@@ -176,7 +175,6 @@ services:
   netdata:
     image: netdata/netdata:latest
     container_name: netdata
-    network_mode: host
     restart: unless-stopped
     cap_add:
       - SYS_PTRACE

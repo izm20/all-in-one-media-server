@@ -205,4 +205,3 @@ services:
       - WATCHTOWER_SCHEDULE=0 0 4 * * 0
       - WATCHTOWER_CLEANUP=true
       - TZ=$TZ
-    

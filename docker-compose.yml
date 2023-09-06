@@ -1,6 +1,58 @@
 version: "3.8"
 
 services:
+  traefik:
+    container_name: traefik
+    image: ghcr.io/traefik/traefik:latest
+    depends_on:
+      - authelia
+    restart: unless-stopped
+    command:
+      - '--api=true'
+      - '--api.dashboard=true'
+      - '--api.insecure=false'
+      - '--pilot.dashboard=false'
+      - '--global.sendAnonymousUsage=false'
+      - '--global.checkNewVersion=false'
+      - '--log=true'
+      - '--log.level=INFO'
+      - '--log.filepath=/config/traefik.log'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedByDefault=false'
+      - '--providers.file=true'
+      - '--providers.file.watch=true'
+      - '--providers.file.directory=/config/dynamic'
+      - '--entryPoints.http=true'
+      - '--entryPoints.http.address=:8080/tcp'
+      - '--entryPoints.http.http.redirections.entryPoint.to=https'
+      - '--entryPoints.http.http.redirections.entryPoint.scheme=https'
+      - '--entryPoints.https=true'
+      - '--entryPoints.https.address=:8443/tcp'
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
+      - '--certificatesResolvers.le.acme.dnsChallenge=true'
+      - '--certificatesResolvers.le.acme.dnsChallenge.provider=cloudflare'
+      - '--certificatesresolvers.le.acme.email=${MY_EMAIL}'
+      - '--certificatesresolvers.le.acme.storage=acme.json'
+    ports:
+      - "80:80"
+      - "8084:8080"
+      - "443:443"
+    environment:
+      - CF_API_EMAIL=${MY_EMAIL}
+      - CF_API_KEY=${CLOUDFLARE_API_TLS}
+      - TZ=$TZ
+      - PUID=$PUID
+      - PGID=$PGID
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $CONFIGDIR/traefik/config:/config
+      - $CONFIGDIR/traefik/certificates:/certificates
+    labels:
+      traefik.enable: true
+      traefik.http.routers.dash.rule: Host(`dash.$DOMAIN_NAME`, `dash.localhost`)
+      traefik.http.routers.dash.service: api@internal
+
   plex:
     container_name: plex
     image: ghcr.io/linuxserver/plex:latest
@@ -14,6 +66,14 @@ services:
       - $CONFIGDIR/plex:/config:rw
       - $PLEXMEDIA:/data/media:rw
       - $CONFIGDIR/plex/tmp:/transcode:rw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.plex.entrypoints=https"
+      - "traefik.http.routers.plex.rule=Host(`plex.$DOMAIN_NAME`, `plex.localhost`)"
+      - "traefik.http.routers.plex.tls=true"
+      - "traefik.http.routers.plex.tls.certresolver=le"
+      - "traefik.http.routers.plex.service=plex"
+      - "traefik.http.services.plex.loadbalancer.server.port=32400"
 
   prowlarr:
     container_name: prowlarr
@@ -27,6 +87,14 @@ services:
       - $CONFIGDIR/prowlarr:/config
     ports:
       - "9696:9696"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prowlarr.entrypoints=https"
+      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.$DOMAIN_NAME`, `prowlarr.localhost`)"
+      - "traefik.http.routers.prowlarr.tls=true"
+      - "traefik.http.routers.prowlarr.tls.certresolver=le"
+      - "traefik.http.routers.prowlarr.service=prowlarr"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
 
   radarr:
     container_name: radarr
@@ -42,6 +110,14 @@ services:
       - $MEDIADIR:/media
     ports:
       - "7878:7878"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.entrypoints=https"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.$DOMAIN_NAME`, `radarr.localhost`)"
+      - "traefik.http.routers.radarr.tls=true"
+      - "traefik.http.routers.radarr.tls.certresolver=le"
+      - "traefik.http.routers.radarr.service=radarr"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
 
   sonarr:
     container_name: sonarr
@@ -57,6 +133,14 @@ services:
       - $MEDIADIR:/media
     ports:
       - "8989:8989"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.entrypoints=https"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.$DOMAIN_NAME`, `sonarr.localhost`)"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.routers.sonarr.tls.certresolver=le"
+      - "traefik.http.routers.sonarr.service=sonarr"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
 
   bazarr:
     container_name: bazarr
@@ -73,6 +157,14 @@ services:
       - $MEDIADIR/libraries/anime:/anime
     ports:
       - "6767:6767"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bazarr.entrypoints=https"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.$DOMAIN_NAME`, `bazarr.localhost`)"
+      - "traefik.http.routers.bazarr.tls=true"
+      - "traefik.http.routers.bazarr.tls.certresolver=le"
+      - "traefik.http.routers.bazarr.service=bazarr"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
 
   overseerr:
     container_name: overseerr
@@ -86,6 +178,14 @@ services:
       - $CONFIGDIR/overseerr:/config
     ports:
       - "5055:5055"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.overseerr.entrypoints=https"
+      - "traefik.http.routers.overseerr.rule=Host(`overseerr.$DOMAIN_NAME`, `overseerr.localhost`)"
+      - "traefik.http.routers.overseerr.tls=true"
+      - "traefik.http.routers.overseerr.tls.certresolver=le"
+      - "traefik.http.routers.overseerr.service=overseerr"
+      - "traefik.http.services.overseerr.loadbalancer.server.port=5055"
 
   tautulli:
     container_name: tautulli
@@ -101,6 +201,14 @@ services:
       - $CONFIGDIR/tautulli:/config
     ports:
       - "8181:8181"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tautulli.entrypoints=https"
+      - "traefik.http.routers.tautulli.rule=Host(`tautulli.$DOMAIN_NAME`, `tautulli.localhost`)"
+      - "traefik.http.routers.tautulli.tls=true"
+      - "traefik.http.routers.tautulli.tls.certresolver=le"
+      - "traefik.http.routers.tautulli.service=tautulli"
+      - "traefik.http.services.tautulli.loadbalancer.server.port=8181"
 
   organizr:
     container_name: organizr
@@ -114,6 +222,14 @@ services:
       - $CONFIGDIR/organizr:/config
     ports:
       - "9983:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.organizr.entrypoints=https"
+      - "traefik.http.routers.organizr.rule=Host(`organizr.$DOMAIN_NAME`, `organizr.localhost`)"
+      - "traefik.http.routers.organizr.tls=true"
+      - "traefik.http.routers.organizr.tls.certresolver=le"
+      - "traefik.http.routers.organizr.service=organizr"
+      - "traefik.http.services.organizr.loadbalancer.server.port=80"
 
   vpn:
     container_name: GlueTun-Nord
@@ -134,6 +250,14 @@ services:
       - COUNTRY=$SERVER_REGIONS
       - VPN_TYPE=$VPN_TYPE
       - TZ=$TZ
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vpn.entrypoints=https"
+      - "traefik.http.routers.vpn.rule=Host(`vpn.$DOMAIN_NAME`, `vpn.localhost`)"
+      - "traefik.http.routers.vpn.tls=true"
+      - "traefik.http.routers.vpn.tls.certresolver=le"
+      - "traefik.http.routers.vpn.service=vpn"
+      - "traefik.http.services.vpn.loadbalancer.server.port=none"
 
   deluge:
     container_name: deluge
@@ -148,6 +272,14 @@ services:
     volumes:
       - $MEDIADIR/downloads:/downloads
       - $CONFIGDIR/deluge:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.deluge.entrypoints=https"
+      - "traefik.http.routers.deluge.rule=Host(`deluge.$DOMAIN_NAME`, `deluge.localhost`)"
+      - "traefik.http.routers.deluge.tls=true"
+      - "traefik.http.routers.deluge.tls.certresolver=le"
+      - "traefik.http.routers.deluge.service=deluge"
+      - "traefik.http.services.deluge.loadbalancer.server.port=8112"
 
   flaresolverr:
     container_name: flaresolverr
@@ -161,6 +293,14 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-None}
       - HEADLESS=${HEADLESS:-true}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flaresolverr.entrypoints=https"
+      - "traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.$DOMAIN_NAME`, `flaresolverr.localhost`)"
+      - "traefik.http.routers.flaresolverr.tls=true"
+      - "traefik.http.routers.flaresolverr.tls.certresolver=le"
+      - "traefik.http.routers.flaresolverr.service=flaresolverr"
+      - "traefik.http.services.flaresolverr.loadbalancer.server.port=8191"
 
   portainer:
     container_name: portainer
@@ -173,6 +313,14 @@ services:
       - TZ=$TZ
     ports:
       - "9000:9000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.entrypoints=https"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.$DOMAIN_NAME`, `portainer.localhost`)"
+      - "traefik.http.routers.portainer.tls=true"
+      - "traefik.http.routers.portainer.tls.certresolver=le"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
   netdata:
     container_name: netdata
@@ -195,6 +343,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - "19999:19999"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.netdata.entrypoints=https"
+      - "traefik.http.routers.netdata.rule=Host(`netdata.$DOMAIN_NAME`, `netdata.localhost`)"
+      - "traefik.http.routers.netdata.tls=true"
+      - "traefik.http.routers.netdata.tls.certresolver=le"
+      - "traefik.http.routers.netdata.service=netdata"
+      - "traefik.http.services.netdata.loadbalancer.server.port=19999"
 
   watchtower:
     container_name: watchtower
@@ -204,6 +360,72 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - WATCHTOWER_SCHEDULE=0 0 4 * * 0
-      - WATCHTOWER_CLEANUP=true
       - TZ=$TZ
+      - PUID=$PUID
+      - PGID=$PGID
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      - WATCHTOWER_SCHEDULE=0 0 4 * * 0
+      - WATCHTOWER_DEBUG=False
+      - WATCHTOWER_NOTIFICATIONS=email
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=$MY_EMAIL
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=$MY_EMAIL
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=smtp.gmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=587
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=$MY_EMAIL
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=$SMTP_SECRET
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.watchtower.entrypoints=https"
+      - "traefik.http.routers.watchtower.rule=Host(`watchtower.$DOMAIN_NAME`, `watchtower.localhost`)"
+      - "traefik.http.routers.watchtower.tls=true"
+      - "traefik.http.routers.watchtower.tls.certresolver=le"
+      - "traefik.http.routers.watchtower.service=watchtower"
+      - "traefik.http.services.watchtower.loadbalancer.server.port=none"
+
+  cloudflare-ddns:
+    image: timothyjmiller/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    security_opt:
+      - no-new-privileges:true
+    network_mode: "host"
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+    volumes:
+      - $CONFIGDIR/cloudflare/config.json:/config.json
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cloudflare-ddns.entrypoints=https"
+      - "traefik.http.routers.cloudflare-ddns.rule=Host(`cloudflare-ddns.$DOMAIN_NAME`, `ddns.localhost`)"
+      - "traefik.http.routers.cloudflare-ddns.tls=true"
+      - "traefik.http.routers.cloudflare-ddns.tls.certresolver=le"
+      - "traefik.http.routers.cloudflare-ddns.service=cloudflare-ddns"
+      - "traefik.http.services.cloudflare-ddns.loadbalancer.server.port=none"
+
+  authelia:
+    container_name: authelia
+    image: authelia/authelia:latest
+    restart: unless-stopped
+    networks:
+      - net
+    volumes:
+      - $CONFIGDIR/authelia:/config
+      - $CONFIGDIR/authelia/certificates:/certificates
+    environment:
+      - TZ=$TZ
+    expose:
+      - 9091
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authelia.entrypoints=https"
+      - "traefik.http.routers.authelia.rule=Host(`authelia.$DOMAIN_NAME`, `authelia.localhost`)"
+      - "traefik.http.routers.authelia.tls=true"
+      - "traefik.http.routers.authelia.tls.certresolver=le"
+      - "traefik.http.routers.authelia.service=authelia"
+      - "traefik.http.services.authelia.loadbalancer.server.port=9091"
+
+networks:
+  net:
+    external: false

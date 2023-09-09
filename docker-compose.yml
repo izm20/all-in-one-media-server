@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 services:
   plex:
@@ -30,6 +30,8 @@ services:
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/prowlarr:/config
+    ports:
+      - "9696:9696"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.$DOMAIN_NAME`, `prowlarr.$LOCAL_DOMAIN`)"
@@ -48,6 +50,8 @@ services:
     volumes:
       - $CONFIGDIR/radarr:/config
       - $MEDIADIR:/media
+    ports:
+      - "7878:7878"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.radarr.rule=Host(`radarr.$DOMAIN_NAME`, `radarr.$LOCAL_DOMAIN`)"
@@ -66,6 +70,8 @@ services:
     volumes:
       - $CONFIGDIR/sonarr:/config
       - $MEDIADIR:/media
+    ports:
+      - "8989:8989"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sonarr.rule=Host(`sonarr.$DOMAIN_NAME`, `sonarr.$LOCAL_DOMAIN`)"
@@ -85,6 +91,8 @@ services:
       - $MEDIADIR/libraries/movies:/movies
       - $MEDIADIR/libraries/tv:/tv
       - $MEDIADIR/libraries/anime:/anime
+    ports:
+      - "6767:6767"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.bazarr.rule=Host(`bazarr.$DOMAIN_NAME`, `bazarr.$LOCAL_DOMAIN`)"
@@ -101,6 +109,8 @@ services:
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/overseerr:/config
+    ports:
+      - "5055:5055"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.overseerr.rule=Host(`overseerr.$DOMAIN_NAME`, `overseerr.$LOCAL_DOMAIN`)"
@@ -119,6 +129,8 @@ services:
       - DEBUG=no
     volumes:
       - $CONFIGDIR/tautulli:/config
+    ports:
+      - "8181:8181"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.tautulli.rule=Host(`tautulli.$DOMAIN_NAME`, `tautulli.$LOCAL_DOMAIN`)"
@@ -135,6 +147,8 @@ services:
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/organizr:/config
+    ports:
+      - "8084:80"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.organizr.rule=Host(`organizr.$DOMAIN_NAME`, `organizr.$LOCAL_DOMAIN`)"
@@ -205,6 +219,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=$TZ
+    ports:
+      - "9000:9000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.portainer.rule=Host(`portainer.$DOMAIN_NAME`, `portainer.$LOCAL_DOMAIN`)"
@@ -230,6 +246,8 @@ services:
       - /sys:/host/sys:ro
       - /etc/os-release:/host/etc/os-release:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "19999:19999"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.netdata.rule=Host(`netdata.$DOMAIN_NAME`, `netdata.$LOCAL_DOMAIN`)"

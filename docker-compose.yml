@@ -15,9 +15,10 @@ services:
       - $PLEXMEDIA:/data/media:rw
       - $CONFIGDIR/plex/tmp:/transcode:rw
     labels:
-      traefik.http.routers.plex.rule: Host(`plex.$DOMAIN_NAME`, `plex.localhost`)
-      traefik.http.services.plex.loadbalancer.server.port: 32400
-      traefik.http.routers.plex.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.plex.rule=Host(`plex.$DOMAIN_NAME`, `plex.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.plex.entrypoints=web"
+      - "traefik.http.services.plex.loadbalancer.server.port=32400"
 
   prowlarr:
     container_name: prowlarr
@@ -29,12 +30,11 @@ services:
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/prowlarr:/config
-    ports:
-      - "9696:9696"
     labels:
-      traefik.http.routers.prowlarr.rule: Host(`prowlarr.$DOMAIN_NAME`, `prowlarr.localhost`)
-      traefik.http.services.prowlarr.loadbalancer.server.port: 9696
-      traefik.http.routers.prowlarr.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.$DOMAIN_NAME`, `prowlarr.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.prowlarr.entrypoints=web"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
 
   radarr:
     container_name: radarr
@@ -48,12 +48,11 @@ services:
     volumes:
       - $CONFIGDIR/radarr:/config
       - $MEDIADIR:/media
-    ports:
-      - "7878:7878"
     labels:
-      traefik.http.routers.radarr.rule: Host(`radarr.$DOMAIN_NAME`, `radarr.localhost`)
-      traefik.http.services.radarr.loadbalancer.server.port: 7878
-      traefik.http.routers.radarr.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.$DOMAIN_NAME`, `radarr.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.radarr.entrypoints=web"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
 
   sonarr:
     container_name: sonarr
@@ -67,12 +66,11 @@ services:
     volumes:
       - $CONFIGDIR/sonarr:/config
       - $MEDIADIR:/media
-    ports:
-      - "8989:8989"
     labels:
-      traefik.http.routers.sonarr.rule: Host(`sonarr.$DOMAIN_NAME`, `sonarr.localhost`)
-      traefik.http.services.sonarr.loadbalancer.server.port: 8989
-      traefik.http.routers.sonarr.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.$DOMAIN_NAME`, `sonarr.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.sonarr.entrypoints=web"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
 
   bazarr:
     container_name: bazarr
@@ -87,12 +85,11 @@ services:
       - $MEDIADIR/libraries/movies:/movies
       - $MEDIADIR/libraries/tv:/tv
       - $MEDIADIR/libraries/anime:/anime
-    ports:
-      - "6767:6767"
     labels:
-      traefik.http.routers.bazarr.rule: Host(`bazarr.$DOMAIN_NAME`, `bazarr.localhost`)
-      traefik.http.services.bazarr.loadbalancer.server.port: 6767
-      traefik.http.routers.bazarr.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.$DOMAIN_NAME`, `bazarr.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.bazarr.entrypoints=web"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
 
   overseerr:
     container_name: overseerr
@@ -104,12 +101,11 @@ services:
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/overseerr:/config
-    ports:
-      - "5055:5055"
     labels:
-      traefik.http.routers.overseerr.rule: Host(`overseerr.$DOMAIN_NAME`, `overseerr.localhost`)
-      traefik.http.services.overseerr.loadbalancer.server.port: 5055
-      traefik.http.routers.overseerr.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.overseerr.rule=Host(`overseerr.$DOMAIN_NAME`, `overseerr.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.overseerr.entrypoints=web"
+      - "traefik.http.services.overseerr.loadbalancer.server.port=5055"
 
   tautulli:
     container_name: tautulli
@@ -123,12 +119,11 @@ services:
       - DEBUG=no
     volumes:
       - $CONFIGDIR/tautulli:/config
-    ports:
-      - "8181:8181"
     labels:
-      traefik.http.routers.tautulli.rule: Host(`tautulli.$DOMAIN_NAME`, `tautulli.localhost`)
-      traefik.http.services.tautulli.loadbalancer.server.port: 8181
-      traefik.http.routers.tautulli.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.tautulli.rule=Host(`tautulli.$DOMAIN_NAME`, `tautulli.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.tautulli.entrypoints=web"
+      - "traefik.http.services.tautulli.loadbalancer.server.port=8181"
 
   organizr:
     container_name: organizr
@@ -140,12 +135,11 @@ services:
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/organizr:/config
-    ports:
-      - "9983:80"
     labels:
-      traefik.http.routers.organizr.rule: Host(`organizr.$DOMAIN_NAME`, `organizr.localhost`)
-      traefik.http.services.organizr.loadbalancer.server.port: 9983
-      traefik.http.routers.organizr.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.organizr.rule=Host(`organizr.$DOMAIN_NAME`, `organizr.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.organizr.entrypoints=web"
+      - "traefik.http.services.organizr.loadbalancer.server.port=80"
 
   vpn:
     container_name: GlueTun-Nord
@@ -167,12 +161,13 @@ services:
       - VPN_TYPE=$VPN_TYPE
       - TZ=$TZ
     labels:
-      traefik.http.routers.deluge.rule: Host(`deluge.$DOMAIN_NAME`, `deluge.localhost`)
-      traefik.http.services.deluge.loadbalancer.server.port: 8112
-      traefik.http.routers.deluge.middlewares: traefik-forward-auth
-      traefik.http.routers.flaresolverr.rule: Host(`flaresolverr.$DOMAIN_NAME`, `flaresolverr.localhost`)
-      traefik.http.services.flaresolverr.loadbalancer.server.port: 8191
-      traefik.http.routers.flaresolverr.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.deluge.rule=Host(`deluge.$DOMAIN_NAME`, `deluge.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.deluge.entrypoints=web"
+      - "traefik.http.services.deluge.loadbalancer.server.port=8112"
+      - "traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.$DOMAIN_NAME`, `flaresolverr.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.flaresolverr.entrypoints=web"
+      - "traefik.http.services.flaresolverr.loadbalancer.server.port=8191"
 
   deluge:
     container_name: deluge
@@ -187,9 +182,6 @@ services:
     volumes:
       - $MEDIADIR/downloads:/downloads
       - $CONFIGDIR/deluge:/config
-    labels:
-      traefik.http.routers.deluge.service: deluge
-
 
   flaresolverr:
     container_name: flaresolverr
@@ -203,8 +195,6 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-None}
       - HEADLESS=${HEADLESS:-true}
-    labels:
-      traefik.http.routers.flaresolverr.service: flaresolverr
 
   portainer:
     container_name: portainer
@@ -215,12 +205,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=$TZ
-    ports:
-      - "9000:9000"
     labels:
-      traefik.http.routers.portainer.rule: Host(`portainer.$DOMAIN_NAME`, `portainer.localhost`)
-      traefik.http.services.portainer.loadbalancer.server.port: 9000
-      traefik.http.routers.portainer.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.$DOMAIN_NAME`, `portainer.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
   netdata:
     container_name: netdata
@@ -241,19 +230,18 @@ services:
       - /sys:/host/sys:ro
       - /etc/os-release:/host/etc/os-release:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - "19999:19999"
     labels:
-      traefik.http.routers.netdata.rule: Host(`netdata.$DOMAIN_NAME`, `netdata.localhost`)
-      traefik.http.services.netdata.loadbalancer.server.port: 19999
-      traefik.http.routers.netdata.middlewares: traefik-forward-auth
+      - "traefik.enable=true"
+      - "traefik.http.routers.netdata.rule=Host(`netdata.$DOMAIN_NAME`, `netdata.$LOCAL_DOMAIN`)"
+      - "traefik.http.routers.netdata.entrypoints=web"
+      - "traefik.http.services.netdata.loadbalancer.server.port=19999"
 
   traefik:
-    image: traefik:latest
+    image: traefik:2.10.4
     container_name: traefik
     command:
       - --log.level=INFO
-      #- --api.insecure=true
+      - --api.insecure=true
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443 #Declares the web-secure entrypoint in Traefik
       - --providers.docker=true
@@ -266,82 +254,10 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
-      - "8084:8080"
-      - "443:443" #Docker sends requests on port 443 to Traefik on port 443
-    environment:
-      - CF_API_EMAIL=${MY_EMAIL}
-      - CF_API_KEY=${CLOUDFLARE_API_TLS}
+      - "8080:8080"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      traefik.http.routers.dash.rule: Host(`dash.$DOMAIN_NAME`, `dash.localhost`)
-      traefik.http.routers.dash.service: api@internal
-      traefik.http.routers.dash.middlewares: traefik-forward-auth
-
-  cloudflare-ddns:
-    image: oznu/cloudflare-ddns
-    restart: unless-stopped
-    container_name: cloudflare
-    environment:
-      - PUID=${PUID} # default user id, defined in .env
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-      - API_KEY=${CLOUDFLARE_API}
-      - ZONE=${DOMAIN_NAME}
-      - PROXIED=true
-    ports:
-     - 8085:80
-
-  cloudflare-companion:
-    image: tiredofit/traefik-cloudflare-companion
-    restart: unless-stopped
-    container_name: cloudflare-companion
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - PUID=${PUID} # default user id, defined in .env
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-      - TRAEFIK_VERSION=2
-      - CF_TOKEN=${CLOUDFLARE_API}
-      - TARGET_DOMAIN=${DOMAIN_NAME}
-      - DOMAIN1=${DOMAIN_NAME}
-      - DOMAIN1_ZONE_ID=${CLOUDFLARE_ZONE_ID}
-      - DOMAIN1_PROXIED=TRUE
-
-  oauth:
-    container_name: oauth
-    restart: unless-stopped
-    image: thomseddon/traefik-forward-auth:2.2.0-arm
-    environment:
-      - PROVIDERS_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - PROVIDERS_GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - SECRET=${OAUTH_SECRET}
-      - INSECURE_COOKIE=true # Example assumes no https, do not use in production
-      - AUTH_HOST=oauth.${DOMAIN_NAME}
-      - URL_PATH=/_oauth
-      - LIFETIME=86400 # 1 day
-      - COOKIE_DOMAIN=${DOMAIN_NAME}
-      - DEFAULT_ACTION=auth
-      - DEFAULT_PROVIDER=google
-      - LOG_LEVEL=trace
-    security_opt:
-      - no-new-privileges:true
-    command:
-      --rule.torrent.action=allow --rule.torrent.rule="(Host(`torrent.$DOMAIN_NAME`) && PathPrefix(`/api`)) || Host(`torrent.localhost`)"
-      --rule.sonarr.action=allow --rule.sonarr.rule="(Host(`sonarr.$DOMAIN_NAME`) && PathPrefix(`/api`)) || Host(`sonarr.localhost`)"
-      --rule.bazarr.action=allow --rule.bazarr.rule="(Host(`bazarr.$DOMAIN_NAME`) && PathPrefix(`/api`)) || Host(`bazarr.localhost`)"
-      --rule.radarr.action=allow --rule.radarr.rule="(Host(`radarr.$DOMAIN_NAME`) && PathPrefix(`/api`)) || Host(`radarr.localhost`)"
-      --rule.portainer.action=allow --rule.portainer.rule="Host(`portainer.localhost`)"
-      --rule.traefik.action=allow --rule.traefik.rule="Host(`dash.localhost`)"
-      --whitelist=${MY_EMAIL}
-    labels:
-      traefik.http.middlewares.traefik-forward-auth.forwardauth.address: http://oauth:4181
-      traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User
-      traefik.http.middlewares.traefik-no-auth.chain.middlewares:
-      traefik.http.services.oauth.loadbalancer.server.port: 4181
-      traefik.http.routers.oauth.rule: Host(`oauth.$DOMAIN_NAME`)
-      traefik.http.routers.oauth.middlewares: traefik-forward-auth
 
   watchtower:
     container_name: watchtower

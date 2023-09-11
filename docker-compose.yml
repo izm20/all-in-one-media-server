@@ -1,13 +1,13 @@
-version: "3.8"
+version: "3.9"
 
 services:
   plex:
     container_name: plex
-    image: ghcr.io/linuxserver/plex:latest
+    image: linuxserver/plex:latest
     restart: unless-stopped
     environment:
-      - PUID=$PLEX_PUID
-      - PGID=$PLEX_PGID
+      - PUID=$PUID
+      - PGID=$PGID
       - TZ=$TZ
     network_mode: host
     volumes:
@@ -17,7 +17,7 @@ services:
 
   prowlarr:
     container_name: prowlarr
-    image: ghcr.io/linuxserver/prowlarr:latest
+    image: linuxserver/prowlarr:latest
     restart: unless-stopped
     environment:
       - PUID=$PUID
@@ -30,7 +30,7 @@ services:
 
   radarr:
     container_name: radarr
-    image: ghcr.io/linuxserver/radarr:latest
+    image: linuxserver/radarr:latest
     restart: unless-stopped
     environment:
       - PUID=$PUID
@@ -45,7 +45,7 @@ services:
 
   sonarr:
     container_name: sonarr
-    image: ghcr.io/linuxserver/sonarr:latest
+    image: linuxserver/sonarr:latest
     restart: unless-stopped
     environment:
       - PUID=$PUID
@@ -60,7 +60,7 @@ services:
 
   bazarr:
     container_name: bazarr
-    image: ghcr.io/linuxserver/bazarr:latest
+    image: linuxserver/bazarr:latest
     restart: unless-stopped
     environment:
       - PUID=$PUID
@@ -76,7 +76,7 @@ services:
 
   overseerr:
     container_name: overseerr
-    image: ghcr.io/linuxserver/overseerr:latest
+    image: linuxserver/overseerr:latest
     restart: unless-stopped
     environment:
       - PUID=$PUID
@@ -89,7 +89,7 @@ services:
 
   tautulli:
     container_name: tautulli
-    image: ghcr.io/linuxserver/tautulli:latest
+    image: linuxserver/tautulli:latest
     restart: unless-stopped
     environment:
       - PUID=$PUID
@@ -107,8 +107,8 @@ services:
     image: organizr/organizr:latest
     restart: unless-stopped
     environment:
-      - PUID=$ORGANIZR_PUID
-      - PGID=$ORGANIZR_PGID
+      - PUID=$PUID
+      - PGID=$PGID
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/organizr:/config
@@ -137,7 +137,7 @@ services:
 
   deluge:
     container_name: deluge
-    image: ghcr.io/linuxserver/deluge:latest
+    image: linuxserver/deluge:latest
     restart: unless-stopped
     network_mode: "service:vpn"
     environment:
@@ -151,7 +151,7 @@ services:
 
   flaresolverr:
     container_name: flaresolverr
-    image: ghcr.io/flaresolverr/flaresolverr:latest
+    image: flaresolverr/flaresolverr:latest
     restart: unless-stopped
     network_mode: "service:vpn"
     environment:
@@ -200,10 +200,21 @@ services:
     container_name: watchtower
     image: containrrr/watchtower:latest
     restart: unless-stopped
-    network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - WATCHTOWER_SCHEDULE=0 0 4 * * 0
-      - WATCHTOWER_CLEANUP=true
       - TZ=$TZ
+      - PUID=$PUID
+      - PGID=$PGID
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      - WATCHTOWER_SCHEDULE=0 0 4 * * 0
+      - WATCHTOWER_DEBUG=False
+      - WATCHTOWER_NOTIFICATIONS=email
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=$MY_EMAIL
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=$MY_EMAIL
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=smtp.gmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=587
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=$MY_EMAIL
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=$SMTP_SECRET
+

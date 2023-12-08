@@ -1,220 +1,175 @@
 version: "3.9"
 
-networks:
-  net:
-    external: false
-    driver: bridge
-  services:
-    external: false
-    driver: bridge
-
 services:
   plex:
     container_name: plex
-    image: ghcr.io/linuxserver/plex:latest
+    image: linuxserver/plex:latest
     restart: unless-stopped
-    networks:
-      - net
     environment:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
-    network_mode: host
     volumes:
-      - $CONFIGDIR/plex:/config:rw
-      - $PLEXMEDIA:/data/media:rw
-      - $CONFIGDIR/plex/tmp:/transcode:rw
+      - $CONFIGDIR/plex:/config
+      - $PLEXMEDIA:/data/media
+      - $CONFIGDIR/plex/tmp:/transcode
+    ports:
+      - 32400:32400
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.plex.rule=Host(`plex.$DOMAIN_NAME`, `plex.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.plex.loadbalancer.server.port=32400"
-      - 'traefik.http.routers.plex.entrypoints=https'
-      - 'traefik.http.routers.plex.tls=true'
-      - 'traefik.http.routers.plex.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.plex.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.plex.rule: Host(`plex.$DOMAIN_NAME`, `plex.docker.localhost`)
+      traefik.http.services.plex.loadbalancer.server.port: 32400
+      traefik.http.routers.plex.middlewares: traefik-forward-auth 
+      traefik.http.routers.plex.entrypoints: https
+      traefik.http.routers.plex.tls: true
+      traefik.http.routers.plex.tls.certresolver: le
 
   prowlarr:
     container_name: prowlarr
-    image: ghcr.io/linuxserver/prowlarr:latest
+    image: linuxserver/prowlarr:latest
     restart: unless-stopped
-    networks:
-      - net
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
+      - PUID=$UID
+      - PGID=$GID
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/prowlarr:/config
-    expose:
-      - 9696
+    ports:
+      - 9696:9696
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.$DOMAIN_NAME`, `prowlarr.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
-      - 'traefik.http.routers.prowlarr.entrypoints=https'
-      - 'traefik.http.routers.prowlarr.tls=true'
-      - 'traefik.http.routers.prowlarr.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.prowlarr.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.prowlarr.rule: Host(`prowlarr.$DOMAIN_NAME`, `prowlarr.docker.localhost`)
+      traefik.http.services.prowlarr.loadbalancer.server.port: 9696
+      traefik.http.routers.prowlarr.middlewares: traefik-forward-auth 
+      traefik.http.routers.prowlarr.entrypoints: https
+      traefik.http.routers.prowlarr.tls: true
+      traefik.http.routers.prowlarr.tls.certresolver: le
 
   radarr:
     container_name: radarr
-    image: ghcr.io/linuxserver/radarr:latest
+    image: linuxserver/radarr:latest
     restart: unless-stopped
-    networks:
-      - net
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
+      - PUID=$UID
+      - PGID=$GID
       - TZ=$TZ
       - UMASK=022
     volumes:
       - $CONFIGDIR/radarr:/config
-      - $MEDIADIR:/media
-    expose:
-      - 7878
+      - $PLEXMEDIA:/media
+      - $MEDIADIR/downloads/complete:/downloads
+    ports:
+      - "7878:7878"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.radarr.rule=Host(`radarr.$DOMAIN_NAME`, `radarr.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
-      - 'traefik.http.routers.radarr.entrypoints=https'
-      - 'traefik.http.routers.radarr.tls=true'
-      - 'traefik.http.routers.radarr.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.radarr.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.radarr.rule: Host(`radarr.$DOMAIN_NAME`, `radarr.docker.localhost`)
+      traefik.http.services.radarr.loadbalancer.server.port: 7878
+      traefik.http.routers.radarr.middlewares: traefik-forward-auth 
+      traefik.http.routers.radarr.entrypoints: https
+      traefik.http.routers.radarr.tls: true
+      traefik.http.routers.radarr.tls.certresolver: le
 
   sonarr:
     container_name: sonarr
-    image: ghcr.io/linuxserver/sonarr:latest
+    image: linuxserver/sonarr:latest
     restart: unless-stopped
-    networks:
-      - net
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
+      - PUID=$UID
+      - PGID=$GID
       - TZ=$TZ
       - UMASK=022
     volumes:
       - $CONFIGDIR/sonarr:/config
-      - $MEDIADIR:/media
-    expose:
-      - 8989
+      - $PLEXMEDIA:/media
+      - $MEDIADIR/downloads/complete:/downloads
+    ports:
+      - "8989:8989"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sonarr.rule=Host(`sonarr.$DOMAIN_NAME`, `sonarr.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
-      - 'traefik.http.routers.sonarr.entrypoints=https'
-      - 'traefik.http.routers.sonarr.tls=true'
-      - 'traefik.http.routers.sonarr.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.sonarr.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.sonarr.rule: Host(`sonarr.$DOMAIN_NAME`, `sonarr.docker.localhost`)
+      traefik.http.services.sonarr.loadbalancer.server.port: 8989
+      traefik.http.routers.sonarr.middlewares: traefik-forward-auth 
+      traefik.http.routers.sonarr.entrypoints: https
+      traefik.http.routers.sonarr.tls: true
+      traefik.http.routers.sonarr.tls.certresolver: le
 
   bazarr:
     container_name: bazarr
-    image: ghcr.io/linuxserver/bazarr:latest
+    image: linuxserver/bazarr:latest
     restart: unless-stopped
-    networks:
-      - net
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
+      - PUID=$UID
+      - PGID=$GID
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/bazarr:/config
       - $MEDIADIR/libraries/movies:/movies
       - $MEDIADIR/libraries/tv:/tv
       - $MEDIADIR/libraries/anime:/anime
-    expose:
-      - 6767
+    ports:
+      - "6767:6767"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.bazarr.rule=Host(`bazarr.$DOMAIN_NAME`, `bazarr.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
-      - 'traefik.http.routers.bazarr.entrypoints=https'
-      - 'traefik.http.routers.bazarr.tls=true'
-      - 'traefik.http.routers.bazarr.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.bazarr.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.bazarr.rule: Host(`bazarr.$DOMAIN_NAME`, `bazarr.docker.localhost`)
+      traefik.http.services.bazarr.loadbalancer.server.port: 6767
+      traefik.http.routers.bazarr.middlewares: traefik-forward-auth 
+      traefik.http.routers.bazarr.entrypoints: https
+      traefik.http.routers.bazarr.tls: true
+      traefik.http.routers.bazarr.tls.certresolver: le
 
   overseerr:
     container_name: overseerr
-    image: ghcr.io/linuxserver/overseerr:latest
+    image: linuxserver/overseerr:latest
     restart: unless-stopped
-    networks:
-      - net
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
+      - PUID=$UID
+      - PGID=$GID
       - TZ=$TZ
     volumes:
       - $CONFIGDIR/overseerr:/config
-    expose:
-      - 5055
+    ports:
+      - "5055:5055"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.overseerr.rule=Host(`overseerr.$DOMAIN_NAME`, `overseerr.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.overseerr.loadbalancer.server.port=5055"
-      - 'traefik.http.routers.overseer.entrypoints=https'
-      - 'traefik.http.routers.overseer.tls=true'
-      - 'traefik.http.routers.overseer.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.overseer.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.overseerr.rule: Host(`overseerr.$DOMAIN_NAME`, `overseerr.docker.localhost`)
+      traefik.http.services.overseerr.loadbalancer.server.port: 5055
+      traefik.http.routers.overseerr.middlewares: traefik-forward-auth 
+      traefik.http.routers.overseerr.entrypoints: https
+      traefik.http.routers.overseerr.tls: true
+      traefik.http.routers.overseerr.tls.certresolver: le
 
   tautulli:
     container_name: tautulli
-    image: ghcr.io/linuxserver/tautulli:latest
+    image: linuxserver/tautulli:latest
     restart: unless-stopped
-    networks:
-      - net
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
+      - PUID=$UID
+      - PGID=$GID
       - TZ=$TZ
       - UMASK=002
       - DEBUG=no
     volumes:
       - $CONFIGDIR/tautulli:/config
-    expose:
-      - 8181
+    ports:
+      - "8181:8181"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.tautulli.rule=Host(`tautulli.$DOMAIN_NAME`, `tautulli.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.tautulli.loadbalancer.server.port=8181"
-      - 'traefik.http.routers.tautulli.entrypoints=https'
-      - 'traefik.http.routers.tautulli.tls=true'
-      - 'traefik.http.routers.tautulli.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.tautulli.middlewares=authelia@docker'
-
-  organizr:
-    container_name: organizr
-    image: organizr/organizr:latest
-    restart: unless-stopped
-    networks:
-      - net
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-    volumes:
-      - $CONFIGDIR/organizr:/config
-    expose:
-      - 80
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.organizr.rule=Host(`organizr.$DOMAIN_NAME`, `organizr.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.organizr.loadbalancer.server.port=80"
-      - 'traefik.http.routers.organizr.entrypoints=https'
-      - 'traefik.http.routers.organizr.tls=true'
-      - 'traefik.http.routers.organizr.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.organizr.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.tautulli.rule: Host(`tautulli.$DOMAIN_NAME`, `tautulli.docker.localhost`)
+      traefik.http.services.tautulli.loadbalancer.server.port: 8181
+      traefik.http.routers.tautulli.middlewares: traefik-forward-auth 
+      traefik.http.routers.tautulli.entrypoints: https
+      traefik.http.routers.tautulli.tls: true
+      traefik.http.routers.tautulli.tls.certresolver: le
 
   vpn:
     container_name: GlueTun-Nord
     image: qmcgaw/gluetun:latest
     restart: unless-stopped
-    networks:
-      - net
     cap_add:
       - NET_ADMIN
-    expose:
-      - 8191
     ports:
-      - "8112:8112"
+      - "8191:8191"
+      - "8988:8988"
       - "6881:6881"
       - "6881:6881/udp"
     environment:
@@ -226,37 +181,31 @@ services:
       - VPN_TYPE=$VPN_TYPE
       - TZ=$TZ
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.deluge.rule=Host(`deluge.$DOMAIN_NAME`, `deluge.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.deluge.loadbalancer.server.port=8112"
-      - "traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.$DOMAIN_NAME`, `flaresolverr.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.flaresolverr.loadbalancer.server.port=8191"
-      - 'traefik.http.routers.deluge.entrypoints=https'
-      - 'traefik.http.routers.deluge.tls=true'
-      - 'traefik.http.routers.deluge.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.deluge.middlewares=authelia@docker'
-      - 'traefik.http.routers.flaresolverr.entrypoints=https'
-      - 'traefik.http.routers.flaresolverr.tls=true'
-      - 'traefik.http.routers.flaresolverr.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.flaresolverr.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.torrent.rule: Host(`torrent.$DOMAIN_NAME`, `torrent.docker.localhost`)
+      traefik.http.services.torrent.loadbalancer.server.port: 8988
+      traefik.http.routers.torrent.middlewares: traefik-forward-auth 
+      traefik.http.routers.torrent.entrypoints: https
+      traefik.http.routers.torrent.tls: true
+      traefik.http.routers.torrent.tls.certresolver: le
 
-  deluge:
-    container_name: deluge
-    image: ghcr.io/linuxserver/deluge:latest
+  qbittorrent:
+    container_name: qbittorrent
+    image: linuxserver/qbittorrent:latest
     restart: unless-stopped
     network_mode: "service:vpn"
     environment:
-      - WEBUI_PORT=8112
-      - PUID=$PUID
-      - PGID=$PGID
+      - PUID=$UID
+      - PGID=$GID
       - TZ=$TZ
+      - WEBUI_PORT=8988
     volumes:
       - $MEDIADIR/downloads:/downloads
-      - $CONFIGDIR/deluge:/config
+      - $CONFIGDIR/qbittorrent:/config
 
   flaresolverr:
     container_name: flaresolverr
-    image: ghcr.io/flaresolverr/flaresolverr:latest
+    image: flaresolverr/flaresolverr:latest
     restart: unless-stopped
     network_mode: "service:vpn"
     environment:
@@ -267,34 +216,56 @@ services:
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-None}
       - HEADLESS=${HEADLESS:-true}
 
+  homarr:
+    image: ghcr.io/ajnart/homarr:latest
+    restart: unless-stopped
+    hostname: homarr
+    container_name: homarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - $CONFIGDIR/homarr/configs:/app/data/configs
+      - $CONFIGDIR/homarr/icons:/app/public/icons
+      - $CONFIGDIR/homarr/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 7575:7575
+    labels:
+      traefik.enable: true
+      traefik.http.routers.homarr.rule: Host(`$DOMAIN_NAME`, `docker.localhost`)
+      traefik.http.services.homarr.loadbalancer.server.port: 7575
+      traefik.http.routers.homarr.middlewares: traefik-forward-auth
+      traefik.http.routers.homarr.entrypoints: https
+      traefik.http.routers.homarr.tls: true
+      traefik.http.routers.homarr.tls.certresolver: le
+
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest
     restart: unless-stopped
-    networks:
-      - services
     volumes:
       - $CONFIGDIR/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=$TZ
-    expose:
-      - 9000
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.$DOMAIN_NAME`, `portainer.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      - 'traefik.http.routers.portainer.entrypoints=https'
-      - 'traefik.http.routers.portainer.tls=true'
-      - 'traefik.http.routers.portainer.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.portainer.middlewares=authelia@docker'
+    ports:
+      - 9050:9000
+      - 8000:8000
+    labels:      
+      traefik.enable: true
+      traefik.http.routers.portainer.rule: Host(`portainer.$DOMAIN_NAME`, `portainer.docker.localhost`)
+      traefik.http.services.portainer.loadbalancer.server.port: 9000
+      traefik.http.routers.portainer.middlewares: traefik-forward-auth 
+      traefik.http.routers.portainer.entrypoints: https
+      traefik.http.routers.portainer.tls: true
+      traefik.http.routers.portainer.tls.certresolver: le
 
   netdata:
     container_name: netdata
     image: netdata/netdata:latest
     restart: unless-stopped
-    networks:
-      - services
     cap_add:
       - SYS_PTRACE
       - SYS_ADMIN
@@ -310,101 +281,73 @@ services:
       - /sys:/host/sys:ro
       - /etc/os-release:/host/etc/os-release:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    expose:
-      - 19999
+    ports:
+      - "19999:19999"
+    labels:      
+      traefik.enable: true
+      traefik.http.routers.netdata.rule: Host(`netdata.$DOMAIN_NAME`, `netdata.docker.localhost`)
+      traefik.http.services.netdata.loadbalancer.server.port: 19999
+      traefik.http.routers.netdata.middlewares: traefik-forward-auth 
+      traefik.http.routers.netdata.entrypoints: https
+      traefik.http.routers.netdata.tls: true
+      traefik.http.routers.netdata.tls.certresolver: le
+
+  dash:
+    container_name: dash
+    image: mauricenino/dashdot:latest
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - '3001:3001'
+    volumes:
+      - /:/mnt/host:ro
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.netdata.rule=Host(`netdata.$DOMAIN_NAME`, `netdata.$LOCAL_DOMAIN`)"
-      - "traefik.http.services.netdata.loadbalancer.server.port=19999"
-      - 'traefik.http.routers.netdata.entrypoints=https'
-      - 'traefik.http.routers.netdata.tls=true'
-      - 'traefik.http.routers.netdata.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.netdata.middlewares=authelia@docker'
+      traefik.enable: true
+      traefik.http.routers.dash.rule: Host(`dash.$DOMAIN_NAME`, `dash.docker.localhost`)
+      traefik.http.services.dash.loadbalancer.server.port: 3001
+      traefik.http.routers.dash.middlewares: traefik-forward-auth 
+      traefik.http.routers.dash.entrypoints: https
+      traefik.http.routers.dash.tls: true
+      traefik.http.routers.dash.tls.certresolver: le
 
   traefik:
-    image: traefik:v2.10.4
+    image: traefik:v2.10
     container_name: traefik
-    depends_on:
-      - authelia
-    environment:
-      - CF_API_EMAIL=$CLOUDFLARE_API_EMAIL
-      - CF_DNS_API_TOKEN=$CLOUDFLARE_DNS_API_TOKEN
-      - CF_ZONE_API_TOKEN=$CLOUDFLARE_ZONE_API_TOKEN
-    volumes:
-      - $CONFIGDIR/traefik:/etc/traefik
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - net
-      - services
-    labels:
-      - 'traefik.enable=true'
-      - "traefik.http.routers.api.rule=Host(`api.$DOMAIN_NAME`, `api.$LOCAL_DOMAIN`)"
-      - 'traefik.http.routers.api.entrypoints=https'
-      - 'traefik.http.routers.api.service=api@internal'
-      - 'traefik.http.routers.api.tls=true'
-      - 'traefik.http.routers.api.tls.certresolver=letsencrypt'
-      - 'traefik.http.routers.api.middlewares=authelia@docker'
-    ports:
-      - '8080:8080'
-      - '80:80'
-      - '443:443'
     command:
-      - '--api'
-      - '--api.dashboard=true'
-      - '--api.insecure=true'
-      - '--providers.docker=true'
-      - '--providers.docker.exposedByDefault=false'
-      - '--entrypoints.http=true'
-      - '--entrypoints.http.address=:80'
-      - '--entrypoints.http.http.redirections.entrypoint.to=https'
-      - '--entrypoints.http.http.redirections.entrypoint.scheme=https'
-      - '--entrypoints.https=true'
-      - '--entrypoints.https.address=:443'
-      - '--certificatesResolvers.letsencrypt.acme.email=$MY_EMAIL'
-      - '--certificatesResolvers.letsencrypt.acme.storage=$CONFIGDIR/traefik/acme.json'
-      - '--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=http'
-      - ' --certificatesResolvers.letsencrypt.acme.dnsChallenge=true'
-      - '--certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare'
-      - '--log=true'
-      - '--log.level=INFO'
+      - --api.insecure=true
+      - --log.level=DEBUG
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.http=true
+      - --entrypoints.http.address=:80
+      - --entrypoints.http.http.redirections.entrypoint.to=https
+      - --entrypoints.http.http.redirections.entrypoint.scheme=https
+      - --entrypoints.https=true
+      - --entrypoints.https.address=:443
+      - --api=true
+      - --api.dashboard=true
+      - --certificatesResolvers.le.acme.dnsChallenge=true
+      - --certificatesResolvers.le.acme.dnsChallenge.provider=cloudflare
+      - --certificatesresolvers.le.acme.email=${CLOUDFLARE_API_EMAIL}
+      - --certificatesresolvers.le.acme.storage=acme.json
     restart: unless-stopped
-
-  authelia:
-    image: authelia/authelia
-    container_name: authelia
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "443:443"    
+    environment:
+      - CF_API_EMAIL=${CLOUDFLARE_API_EMAIL}
+      - CF_API_KEY=${CLOUDFLARE_API}
     volumes:
-      - $CONFIGDIR/authelia:/config
-      - $CONFIGDIR/authelia/users_database.yml:/app/users_database.yml
-    networks:
-      - net
-      - services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
-      - 'traefik.enable=true'
-      - "traefik.http.routers.authelia.rule=Host(`authelia.$DOMAIN_NAME`, `authelia.$LOCAL_DOMAIN`)"
-      - 'traefik.http.routers.authelia.entrypoints=https'
-      - 'traefik.http.routers.authelia.tls=true'
-      - 'traefik.http.routers.authelia.tls.certresolver=letsencrypt'
-      - 'traefik.http.middlewares.authelia.forwardAuth.address=http://authelia:9091/api/verify?rd=https%3A%2F%2Fauthelia.docker.localhost%2F'
-      - 'traefik.http.middlewares.authelia.forwardAuth.trustForwardHeader=true'
-      - 'traefik.http.middlewares.authelia.forwardAuth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email'
-    expose:
-      - 9091
-    restart: unless-stopped
-    environment:
-      - TZ=$TZ
-
-  redis:
-    image: redis:alpine
-    container_name: redis
-    volumes:
-      - $CONFIGDIR/redis:/data
-    networks:
-      - net
-    expose:
-      - 6379
-    restart: unless-stopped
-    environment:
-      - TZ=$TZ
+      traefik.enable: true
+      traefik.http.routers.traefik.rule: Host(`traefik.$DOMAIN_NAME`, `traefik.docker.localhost`)
+      traefik.http.routers.traefik.service: api@internal    
+      traefik.http.routers.traefik.middlewares: traefik-forward-auth 
+      traefik.http.routers.traefik.entrypoints: https
+      traefik.http.routers.traefik.tls: true
+      traefik.http.routers.traefik.tls.certresolver: le
 
   cloudflare-ddns:
     image: oznu/cloudflare-ddns
@@ -430,18 +373,48 @@ services:
       - TZ=$TZ
       - TRAEFIK_VERSION=2
       - CF_EMAIL=$CLOUDFLARE_API_EMAIL
-      - CF_TOKEN=$CLOUDFLARE_DNS_API_TOKEN
+      - CF_TOKEN=$CLOUDFLARE_API
       - TARGET_DOMAIN=$DOMAIN_NAME
       - DOMAIN1=$DOMAIN_NAME
       - DOMAIN1_ZONE_ID=$CLOUDFLARE_ZONE_API_TOKEN
       - DOMAIN1_PROXIED=TRUE
 
+  oauth:
+    container_name: oauth
+    restart: unless-stopped
+    image: thomseddon/traefik-forward-auth:2.1-arm64
+    environment:
+      - PROVIDERS_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - PROVIDERS_GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - SECRET=${OAUTH_SECRET}
+      - INSECURE_COOKIE=true
+      - AUTH_HOST=oauth.${DOMAIN_NAME}
+      - URL_PATH=/_oauth
+      - LIFETIME=86400      
+      - COOKIE_DOMAIN=${DOMAIN_NAME}
+      - DEFAULT_ACTION=auth
+      - DEFAULT_PROVIDER=google
+      - LOG_LEVEL=trace
+    security_opt:
+      - no-new-privileges:true    
+    command: 
+      --whitelist=${MY_EMAIL}
+    labels:
+      traefik.enable: true
+      traefik.http.middlewares.traefik-forward-auth.forwardauth.address: http://oauth:4181
+      traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User      
+      traefik.http.middlewares.traefik-no-auth.chain.middlewares:
+      traefik.http.services.oauth.loadbalancer.server.port: 4181
+      traefik.http.routers.oauth.rule: Host(`oauth.$DOMAIN_NAME`, `oauth.docker.localhost`)
+      traefik.http.routers.oauth.middlewares: traefik-forward-auth
+      traefik.http.routers.oauth.entrypoints: https
+      traefik.http.routers.oauth.tls: true
+      traefik.http.routers.oauth.tls.certresolver: le
+
   watchtower:
     container_name: watchtower
     image: containrrr/watchtower:latest
     restart: unless-stopped
-    networks:
-      - services
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
